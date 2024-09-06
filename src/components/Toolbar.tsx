@@ -15,7 +15,16 @@ const Toolbar: React.FC = () => {
     redo,
     shapeType,
     setShapeType,
+    shapes,
   } = useDrawingStore();
+
+  const handleUndo = () => {
+    undo();
+  };
+
+  const handleRedo = () => {
+    redo();
+  };
 
   return (
     <div className="mb-4 flex flex-wrap space-x-4">
@@ -58,14 +67,16 @@ const Toolbar: React.FC = () => {
         className="w-32"
       />
       <button
-        onClick={undo}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={handleUndo}
+        disabled={shapes.length === 0}
+        className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
       >
         Undo
       </button>
       <button
-        onClick={redo}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={handleRedo}
+        disabled={true} // Disable redo for now as we don't have redo stack in the current implementation
+        className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
       >
         Redo
       </button>
