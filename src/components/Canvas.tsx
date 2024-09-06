@@ -18,6 +18,7 @@ const Canvas: React.FC = () => {
     fontSize,
     emitDraw,
     receiveDrawing,
+    forceUpdate,
   } = useDrawingStore();
 
   const [textInput, setTextInput] = useState("");
@@ -29,19 +30,26 @@ const Canvas: React.FC = () => {
       ctx.strokeStyle = shape.color;
       ctx.fillStyle = shape.color;
       ctx.lineWidth = shape.brushSize;
-
+      console.log("Drawing shape:", shape);
+      if (!shape || !shape.type || !shape.points || shape.points.length === 0) {
+        console.error("Invalid shape data:", shape);
+        return;
+      }
       switch (shape.type) {
         case "path":
+          console.log("path is rendered ");
           ctx.moveTo(shape.points[0].x, shape.points[0].y);
           shape.points.forEach((point) => ctx.lineTo(point.x, point.y));
           ctx.stroke();
           break;
         case "line":
+          console.log("line should be rendered");
           ctx.moveTo(shape.points[0].x, shape.points[0].y);
           ctx.lineTo(shape.points[1].x, shape.points[1].y);
           ctx.stroke();
           break;
         case "rectangle":
+          console.log("rectangle should be rendered");
           const [start, end] = shape.points;
           ctx.rect(start.x, start.y, end.x - start.x, end.y - start.y);
           ctx.stroke();
@@ -86,15 +94,25 @@ const Canvas: React.FC = () => {
   }, [addShape, receiveDrawing]);
 
   useEffect(() => {
+    console.log("Shapes updated:", shapes);
+
     const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    shapes.forEach((shape) => drawShape(ctx, shape));
-  }, [shapes, drawShape]);
+    if (canvas) {
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        console.log("Clearing canvas and redrawing shapes");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        shapes.forEach((shape, index) => {
+          console.log(`Drawing shape ${index}:`, shape);
+          drawShape(ctx, shape);
+        });
+      } else {
+        console.error("Could not get 2D context from canvas");
+      }
+    } else {
+      console.error("Canvas ref is null");
+    }
+  }, [shapes, drawShape, forceUpdate]);
 
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

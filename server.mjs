@@ -12,7 +12,7 @@ nextApp.prepare().then(() => {
   const server = http.createServer(app);
   const io = new Server(server, {
     cors: {
-      origin: "http://localhost:3000",
+      origin: "https://paywize-assignment.fly.dev/",
       methods: ["GET", "POST"],
     },
   });

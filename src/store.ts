@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import io from "socket.io-client";
 const socket = io(
-  process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3000",
+  process.env.NEXT_PUBLIC_SOCKET_URL || "https://paywize-assignment.fly.dev/",
 );
 export interface Point {
   x: number;
@@ -43,6 +43,8 @@ interface DrawingState {
   redo: () => void;
   emitDraw: (shape: Shape) => void;
   receiveDrawing: (callback: (shape: Shape) => void) => void;
+  forceUpdate: number;
+  triggerForceUpdate: () => void;
 }
 
 export const useDrawingStore = create<DrawingState>((set) => ({
@@ -52,6 +54,7 @@ export const useDrawingStore = create<DrawingState>((set) => ({
   brushSize: 5,
   shapes: [],
   history: [],
+  forceUpdate: 0,
   historyIndex: -1,
   fontSize: 36,
   setTool: (tool) => set({ tool }),
@@ -99,11 +102,11 @@ export const useDrawingStore = create<DrawingState>((set) => ({
     console.log("Emitting draw event:", shape);
     socket.emit("draw", shape);
   },
-
+  triggerForceUpdate: () =>
+    set((state) => ({ forceUpdate: state.forceUpdate + 1 })),
   receiveDrawing: (callback: (shape: Shape) => void) => {
     socket.on("draw", (shape: Shape) => {
       console.log("Received draw event:", shape);
-      callback(shape); // Keep the callback if needed for additional processing
       set((state) => {
         const newShapes = [...state.shapes, shape];
         const newHistory = state.history.slice(0, state.historyIndex + 1);
@@ -112,8 +115,10 @@ export const useDrawingStore = create<DrawingState>((set) => ({
           shapes: newShapes,
           history: newHistory,
           historyIndex: state.historyIndex + 1,
+          forceUpdate: state.forceUpdate + 1,
         };
       });
+      callback(shape); // Keep the callback if needed for additional processing
     });
   },
 }));
