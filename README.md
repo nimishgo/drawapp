@@ -2,6 +2,10 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+Please check the live deployment for demo : https://paywize-assignment.fly.dev/
+
+<video src="./Screencast from 2024-09-08 15-38-49.mp4"></video>
+
 First, run the development server:
 
 ```bash
